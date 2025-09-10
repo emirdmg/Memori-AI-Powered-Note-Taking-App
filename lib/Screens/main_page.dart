@@ -21,6 +21,10 @@ class _MainPageState extends State<MainPage> {
               fontSize: 24
           ),
         ),
+        actions: [IconButton(
+              onPressed: (){},
+              icon: Icon(Icons.account_circle_outlined)
+            ),],
       ),
       body: Center(
         child: Column(
