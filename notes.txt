@@ -1,0 +1,123 @@
+1) Mimariyi kurduk (Ana iskelet)
+
+NavigationPage: Uygulamanın “kılavuzu”. Altta BottomNavigationBar var.
+
+Home (MainPage) ve Settings sayfalarını _pages listesinde tutuyoruz.
+
+Add Note ise bir sayfa olarak gösterilmiyor; tıklanınca push ile açılıyor (modal akış gibi).
+
+MainPage: Notları listeleyen ana ekran (stateful).
+
+AddNotePage: Not yazma ekranı; kaydet deyince veriyi geri döndürüyor.
+
+2) Add Note akışı (push + geri dönüş)
+
+Bottom bar’da Add Note’a basınca:
+
+Navigator.push<Map<String, dynamic>?> ile AddNotePage açılıyor.
+
+Kullanıcı “✅ Kaydet”e basarsa Navigator.pop(context, noteMap) ile JSON (Map) geri dönüyor.
+
+NavigationPage dönüşte gelen Map’i MainPage’e aktarıyor.
+
+3) MainPage → GlobalKey ile güncelleme
+
+MainPageState (public) için GlobalKey<MainPageState> oluşturduk.
+
+NavigationPage, result dönünce:
+_mainKey.currentState?.addNote(result);
+
+Böylece Home ekranındaki liste anında güncelleniyor.
+
+4) AddNotePage – iki alanlı düzen
+
+Tek TextField ile farklı stil verilemediği için:
+
+Üstte Başlık (tek satır, büyük/kalın)
+
+Altta İçerik (multiline, Expanded ile tüm alan)
+
+İki ayrı controller kullandık: _titleController, _bodyController.
+
+Kaydet butonu görünürlüğü için _hasChanged tuttuk.
+
+initState’te ortak onChange listener’ı iki controllera da ekledik (trim’li kontrol).
+
+Başlık veya içerik doluysa _hasChanged = true → AppBar’da ✅ çıkıyor.
+
+Kaydet akışı:
+
+Boşsa kayıt yapmıyoruz.
+
+Doluysa { title, body, createdAt } şeklinde Map oluşturup Navigator.pop ile geri gönderiyoruz.
+
+Kritik düzeltme: Listener eklemelerini onChange fonksiyonunun dışında yaptık. Aksi halde hiç bağlanmıyor ve buton çıkmıyordu.
+Ayrıca değişikliklerde bazen hot restart gerektiğini not ettik.
+
+5) Notları JSON olarak saklama (local storage)
+
+shared_preferences paketini ekledik.
+
+MainPage’de notes tipini List<Map<String, dynamic>> yaptık.
+
+Kaydetme: addNote içinde listeyi güncelledikten sonra _saveNotes() çağırıyoruz:
+
+jsonEncode(notes) → tek bir String
+
+SharedPreferences.setString('notes', ...) ile kalıcı yazıyoruz.
+
+(Okuma kısmını da ekleyebilirsin: _loadNotes() + initState’te çağırma; böylece açılışta notlar geri yüklenir.)
+
+6) Kart görünümü (CardView)
+
+Kendi CardView widget’ını oluşturdun:
+
+Parametre olarak title ve body alacak şekilde düzenledik.
+
+İçeride iki küçük yardımcı:
+
+Başlık: ilk 10 karakter → …
+
+İçerik: ilk 20 karakter → …
+
+Layout cilası:
+
+crossAxisAlignment: CrossAxisAlignment.start
+
+mainAxisSize: MainAxisSize.min
+
+Metinler Flexible + overflow: TextOverflow.ellipsis
+
+MainPage’de (test için elle 5–6 kart yerine):
+
+notes.map((n) => CardView(title: n['title'], body: n['body']))
+
+Wrap/Scroll ile dinamik olarak kartları basıyoruz.
+
+7) Yolda çözdüğümüz ufak pürüzler
+
+İki kez _pages tanımı (çift tanım) → tekine indirip temizledik.
+
+MainPage state sınıfını public yaptık (GlobalKey erişebilsin diye).
+
+Listener’ın yanlış konumda olması → dışarı aldık ve trim’li değişim kontrolü ekledik.
+
+Navigator.push dönüş tipini generic verdik (Map<String, dynamic>?) → IDE’nin “add cast” tuzak önerisini gereksiz kıldık.
+
+Büyük resim – uçtan uca akış
+
+Add Note (bottom bar) → push AddNotePage
+
+Kullanıcı Başlık + İçerik yazar → değişim olunca ✅ Kaydet görünür
+
+Kaydet → {title, body, createdAt} Map’iyle pop
+
+NavigationPage dönüşü MainPage.addNote(noteMap)’e iletir
+
+MainPage:
+
+notes listesine ekler (UI anında güncellenir)
+
+_saveNotes() ile local storage’a yazar
+
+Home’da CardView’ler: başlık 10, içerik 20 karakterlik özetle görünür
