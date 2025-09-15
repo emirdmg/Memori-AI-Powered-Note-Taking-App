@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:memori_ai/Screens/main_page.dart';
 import 'package:memori_ai/navigation_page.dart';
 
 void main() {
@@ -14,7 +13,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(),
-      home: NavigationPage(),
+      home: Scaffold(
+        body: GoogleBottomBar(),
+      )
     );
   }
 }

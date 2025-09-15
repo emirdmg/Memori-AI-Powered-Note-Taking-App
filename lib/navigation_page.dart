@@ -1,57 +1,58 @@
 import 'package:flutter/material.dart';
-import 'package:memori_ai/Screens/main_page.dart';
-import 'package:memori_ai/Screens/settings_page.dart';
-import 'package:memori_ai/Screens/add_note_page.dart';
+import 'package:memori_ai/screens/add_note_page.dart';
+import 'package:memori_ai/screens/home_page.dart';
+import 'package:memori_ai/screens/profile_page.dart';
+import 'package:memori_ai/screens/search_page.dart';
+import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 
-class NavigationPage extends StatefulWidget {
-  const NavigationPage({super.key});
+class GoogleBottomBar extends StatefulWidget {
+  const GoogleBottomBar({super.key});
 
   @override
-  State<NavigationPage> createState() => _NavigationPageState();
+  State<GoogleBottomBar> createState() => _GoogleBottomBarState();
 }
 
-class _NavigationPageState extends State<NavigationPage> {
-
+class _GoogleBottomBarState extends State<GoogleBottomBar> {
+  final bool shouldShowNavbar = true;
   int _currentIndex = 0;
-
-  final GlobalKey<MainPageState> _mainKey = GlobalKey<MainPageState>();
-  late final List<Widget> _pages = [
-    MainPage(key: _mainKey),
-    const SettingsPage(),
+  final List<Widget> _pages = [
+    const HomePage(),
+    const AddNotePage(),
+    const SearchPage(),
+    const ProfilePage()
   ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _currentIndex == 0 ? _pages[0] : _pages[1],
-      bottomNavigationBar: BottomNavigationBar(
+      body: _pages[_currentIndex],
+      bottomNavigationBar: shouldShowNavbar ? SalomonBottomBar(
         currentIndex: _currentIndex,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Ana Sayfa'),
-          BottomNavigationBarItem(icon: Icon(Icons.add_circle), label: 'Add Note'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
-        ],
-          onTap: (index) async {
-            if (index == 1) {
-              // Add Note sayfasını aç ve sonucu "aynı scope" içinde al
-              final result = await Navigator.push<Map<String, dynamic>?>(
-                context,
-                MaterialPageRoute(builder: (_) => const AddNotePage()),
-              );
-
-              // Sonuç geldiyse ana sayfadaki listeye ekle
-              if (result != null) {
-                _mainKey.currentState?.addNote(result); // NOT: addNote'un Map alacak (aşağıdaki uyarı)
-              }
-              return; // Home'da kal
-            }
-
-            // 0 -> Home, 2 -> Settings
-            setState(() {
-              _currentIndex = (index == 2) ? 1 : 0;
-            });
-          }
-      ),
+        onTap: (i) => setState(() => _currentIndex = i),
+        items: _navBarItems,
+      ) : null,
     );
   }
 }
+
+final _navBarItems = [
+  SalomonBottomBarItem(
+    icon: const Icon(Icons.home),
+    title: const Text("Home"),
+    selectedColor: Colors.purple,
+  ),
+  SalomonBottomBarItem(
+    icon: const Icon(Icons.add_circle),
+    title: const Text("Add Note"),
+    selectedColor: Colors.pink,
+  ),
+  SalomonBottomBarItem(
+    icon: const Icon(Icons.search),
+    title: const Text("Search"),
+    selectedColor: Colors.orange,
+  ),
+  SalomonBottomBarItem(
+    icon: const Icon(Icons.person),
+    title: const Text("Profile"),
+    selectedColor: Colors.teal,
+  ),
+];
